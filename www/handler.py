@@ -4,5 +4,3 @@ import coroweb
 async def index(*args,**kw):
     return 'hello world!'
 
-index_handler=coroweb.RequestHandler(index)
-

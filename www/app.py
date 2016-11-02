@@ -32,7 +32,6 @@ async def middleware_factory(app, handler):
     return middleware_handler
 
 
-
 #主界面
 def add_handler(app,handler):
     if isinstance(handler,RequestHandler):
@@ -48,10 +47,26 @@ def add_handler(app,handler):
         logging.error('handler is not RequestHandler!')
         raise Exception('handler is not RequestHandler1')
 
+
+#添加处理函数
+def add_router(app,handler_file):
+    modules=__import__(handler_file)
+    for attr in dir(modules):
+        if attr.startswith('__'):
+            continue
+        fun=getattr(modules,attr)
+        method=getattr(fun,'__method__',None)
+        path=getattr(fun,'__path__',None)
+        if method and path:
+            logging.info('add handler %s' % attr)
+            add_handler(app,RequestHandler(fun))
+
+
+
 #初始化web
 async def init(loop):
     app=web.Application(loop=loop,middlewares=[middleware_factory])
-    add_handler(app,handler.index_handler)
+    add_router(app,'handler')
     host='0.0.0.0'
     port='80'
     await loop.create_server(app.make_handler(),host,port)
